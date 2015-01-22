@@ -1,0 +1,27 @@
+{
+  "manifest_version": 2,
+  "name": "WhatsApp™ Web",
+  "description": "__MSG_appDesc__",
+  "default_locale": "en",
+  "author": "Marco Trevisan",
+  "minimum_chrome_version": "36.0",
+  "version": "0.9.1",
+  "icons": {
+    "16": "icon_16.png",
+    "128": "icon_128.png",
+    "256": "icon_256.png",
+    "512": "icon_512.png"
+  },
+  "app": {
+    "background": {
+      "scripts": ["main.js"]
+    }
+  },
+  "permissions": [
+    "audio",
+    "audioCapture",
+    "notifications",
+    "videoCapture",
+    "webview"
+  ]
+}

@@ -1,0 +1,14 @@
+webview {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+
+#dummy-workaround {
+  background-color: #fff;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  position: fixed;
+  display: none;
+}
