@@ -14,6 +14,7 @@ onload = function()
   var webview = getWebView();
   reLayout();
 
+  window.addEventListener('keydown', handleKeyDown);
   window.addEventListener('message', onWebViewMessage);
 
   webview.addEventListener('permissionrequest', function(e) {
@@ -96,6 +97,25 @@ function onWebViewMessage(msg)
       this_win.clearAttention();
     }
     unread = data.unread;
+  }
+}
+
+function handleKeyDown(event)
+{
+  console.log(event.keyCode);
+  if (event.ctrlKey)
+  {
+    switch (event.keyCode)
+    {
+      case 81: // Ctrl+q
+        window.close();
+        break;
+
+      case 82: // Ctrl+r
+      case 115: // F5
+        getWebView().reload();
+        break;
+    }
   }
 }
 
