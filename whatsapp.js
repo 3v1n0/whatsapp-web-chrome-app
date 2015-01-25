@@ -14,6 +14,8 @@ onload = function()
   var webview = getWebView();
   reLayout();
 
+  window.addEventListener('message', onWebViewMessage);
+
   webview.addEventListener('permissionrequest', function(e) {
     if (e.permission === 'media' || e.permission === 'geolocation') {
       e.request.allow();
@@ -29,7 +31,7 @@ onload = function()
   });
 
   webview.addEventListener('loadstart', handleLoadStart);
-  webview.addEventListener('loadstop', setupRepaintWorkaround);
+  webview.addEventListener('loadstop', injectJS);
 
   webview.addEventListener('newwindow', function(e) {
     e.stopImmediatePropagation();
@@ -60,7 +62,44 @@ function handleLoadStart(e)
   }
 }
 
-function setupRepaintWorkaround()
+function injectJS()
+{
+  var loader = new XMLHttpRequest();
+  loader.open('GET', 'injected.js');
+  loader.onload = function() {
+    var webview = getWebView();
+    webview.executeScript({ code: this.responseText }, function(res) {
+      webview.contentWindow.postMessage('setup', '*');
+    });
+  }
+  loader.send();
+}
+
+function onWebViewMessage(msg)
+{
+  var data = msg.data;
+
+  if (data === 'initialized')
+  {
+    console.debug("Web View initialized");
+    repaintWorkaround();
+  }
+  else if (typeof(data.unread) != "undefined")
+  {
+    var this_win = chrome.app.window.current();
+    if (data.unread > unread)
+    {
+      this_win.drawAttention();
+    }
+    else if (data.unread === 0)
+    {
+      this_win.clearAttention();
+    }
+    unread = data.unread;
+  }
+}
+
+function repaintWorkaround()
 {
   /* This is an ugly workaround that unfortunately is needed in order to
    * make the webview to repaint as soon as the whatsapp web client has been
@@ -70,41 +109,12 @@ function setupRepaintWorkaround()
    * us when the whatsapp initialization is done, while we show/hide a dummy div
    */
 
-  var webview = getWebView();
+  window.setTimeout(function() {
+    var workaround_div = document.querySelector('#dummy-workaround');
+    workaround_div.style.display = 'block';
 
-  window.addEventListener('message', function(e) {
-    if (e.data === 'initialized')
-    {
-      window.setTimeout(function() {
-        var workaround_div = document.querySelector('#dummy-workaround');
-        workaround_div.style.display = 'block';
-
-        window.setTimeout(function() {
-          workaround_div.style.display = 'none';
-        }, 2000);
-      }, 1000);
-    }
-    else if (typeof(e.data.unread) != "undefined")
-    {
-      var this_win = chrome.app.window.current();
-      if (e.data.unread > unread)
-      {
-        this_win.drawAttention();
-      }
-      else if (e.data.unread === 0)
-      {
-        this_win.clearAttention();
-      }
-      unread = e.data.unread;
-    }
-  });
-
-  var loader = new XMLHttpRequest();
-  loader.open('GET', 'injected.js');
-  loader.onload = function() {
-    webview.executeScript({ code: this.responseText }, function(res) {
-      webview.contentWindow.postMessage('setup', '*');
-    });
-  }
-  loader.send();
+    window.setTimeout(function() {
+      workaround_div.style.display = 'none';
+    }, 2000);
+  }, 1000);
 }
