@@ -61,7 +61,7 @@ function handleLoadStart(e)
 
 function setupRepaintWorkaround()
 {
-  /* This is an ugly workaround that unfortunately it's needed in order to
+  /* This is an ugly workaround that unfortunately is needed in order to
    * make the webview to repaint as soon as the whatsapp web client has been
    * loaded. Without this, the view is not shown until something happens.
    *
@@ -70,51 +70,9 @@ function setupRepaintWorkaround()
    */
 
   var webview = getWebView();
-  webview.executeScript({ code: " \
-    var startup = document.querySelector('#startup'); \
-    var spinner = document.querySelector('*.spinner-container'); \
-    var appwindow; \
-    window.addEventListener('message', function(e) { \
-      appwindow = e.source; \
-    }); \
-    \
-    var observer = new MutationObserver(function(mutationRecords) { \
-      var favicon = document.querySelector('#favicon'); \
-      for (var m in mutationRecords) \
-      { \
-        var target = mutationRecords[m].target; \
-        if (target == favicon) \
-        { \
-          send_initialized(); \
-          break; \
-        } \
-        else \
-        { \
-          var removed_nodes = Array.prototype.slice.call(mutationRecords[m].removedNodes); \
-          for (var n in removed_nodes) \
-          { \
-            if (removed_nodes[n] == startup || removed_nodes[n] == spinner) \
-            { \
-              send_initialized(); \
-              break; \
-            } \
-          } \
-        } \
-      } \
-    }); \
-    \
-    observer.observe(document, {subtree: true, attributes: true, childList: true }); \
-    \
-    function send_initialized() \
-    { \
-      appwindow.postMessage('initialized', '*'); \
-      observer = null; \
-    } \
-    "
-  });
 
   window.addEventListener('message', function(e) {
-    if (e.data === "initialized")
+    if (e.data === 'initialized')
     {
       window.setTimeout(function() {
         var workaround_div = document.querySelector('#dummy-workaround');
@@ -127,5 +85,12 @@ function setupRepaintWorkaround()
     }
   });
 
-  webview.contentWindow.postMessage("setup", "*");
+  var loader = new XMLHttpRequest();
+  loader.open('GET', 'injected.js');
+  loader.onload = function() {
+    webview.executeScript({ code: this.responseText }, function(res) {
+      webview.contentWindow.postMessage('setup', '*');
+    });
+  }
+  loader.send();
 }
