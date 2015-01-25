@@ -24,7 +24,7 @@ chrome.app.runtime.onRestarted.addListener(function() {
  */
 function runApp() {
   chrome.app.window.create('whatsapp.html', {
-  	id: "browserWinID",
+  	id: "whatsapp-web-window",
     innerBounds: {
       'width': 1024,
       'height': 768
