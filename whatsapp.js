@@ -82,10 +82,10 @@ function onWebViewMessage(msg)
 
   if (data === 'initialized')
   {
-    console.debug("Web View initialized");
+    console.debug('Web View initialized');
     repaintWorkaround();
   }
-  else if (typeof(data.unread) != "undefined")
+  else if (typeof(data.unread) != 'undefined')
   {
     var this_win = chrome.app.window.current();
     if (data.unread > unread)
@@ -97,6 +97,7 @@ function onWebViewMessage(msg)
       this_win.clearAttention();
     }
     unread = data.unread;
+    updateTitle();
   }
 }
 
@@ -117,6 +118,12 @@ function handleKeyDown(event)
         break;
     }
   }
+}
+
+function updateTitle()
+{
+  var appname = chrome.runtime.getManifest().name;
+  document.title = appname + (unread ? ' ('+unread+')' : '');
 }
 
 function repaintWorkaround()
