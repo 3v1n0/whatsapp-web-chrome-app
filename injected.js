@@ -51,6 +51,9 @@ function onLoaded()
 
 function send_initialized()
 {
+  if (!init_observer)
+    return;
+
   appwindow.postMessage('initialized', '*');
   init_observer.disconnect();
   init_observer = null;
