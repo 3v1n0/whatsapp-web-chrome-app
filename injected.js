@@ -1,41 +1,83 @@
 var startup = document.querySelector('#startup');
 var spinner = document.querySelector('*.spinner-container');
 var appwindow = null;
+var init_observer = null;
+var count_obser = null;
+var last_unread = 0;
 
 window.addEventListener('message', function(e) {
   if (!appwindow)
-    appwindow = e.source;
-});
-
-var observer = new MutationObserver(function(mutationRecords) {
-  var favicon = document.querySelector('#favicon');
-  for (var m in mutationRecords)
   {
-    var target = mutationRecords[m].target;
-    if (target == favicon)
-    {
-      send_initialized();
-      break;
-    }
-    else
-    {
-      var removed_nodes = Array.prototype.slice.call(mutationRecords[m].removedNodes);
-      for (var n in removed_nodes)
-      {
-        if (removed_nodes[n] == startup || removed_nodes[n] == spinner)
-        {
-          send_initialized();
-          break;
-        }
-      }
-    }
+    appwindow = e.source;
+    onLoaded();
   }
 });
 
-observer.observe(document, {subtree: true, attributes: true, childList: true });
+function onLoaded()
+{
+  init_observer = new MutationObserver(function(mutationRecords) {
+    var favicon = document.querySelector('#favicon');
+    for (var m in mutationRecords)
+    {
+      var target = mutationRecords[m].target;
+      if (target == favicon)
+      {
+        send_initialized();
+        break;
+      }
+      else
+      {
+        var removed_nodes = Array.prototype.slice.call(mutationRecords[m].removedNodes);
+        for (var n in removed_nodes)
+        {
+          if (removed_nodes[n] == startup || removed_nodes[n] == spinner)
+          {
+            send_initialized();
+            break;
+          }
+        }
+      }
+    }
+  });
+
+  init_observer.observe(document, {subtree: true, attributes: true, childList: true });
+
+  // It would be nicer to initialize this after initialization, but let's be safer
+  count_obser = new MutationObserver(verify_unread);
+  count_obser.observe(document, {subtree: true, attributes: true });
+
+  verify_unread();
+}
 
 function send_initialized()
 {
   appwindow.postMessage('initialized', '*');
-  observer = null;
+  init_observer.disconnect();
+  init_observer = null;
+}
+
+function unread_count()
+{
+  var unread_elements = document.querySelectorAll('span.unread-count');
+  var unread = 0;
+
+  for (var i = 0; i < unread_elements.length; ++i)
+  {
+    var count = parseInt(unread_elements[i].textContent);
+    if (!isNaN(count))
+      unread += count;
+  }
+
+  return unread;
+}
+
+function verify_unread()
+{
+  var unread = unread_count();
+
+  if (last_unread != unread)
+  {
+    appwindow.postMessage({'unread': unread}, '*');
+    last_unread = unread;
+  }
 }
