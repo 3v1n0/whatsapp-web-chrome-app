@@ -1,4 +1,5 @@
 window.onresize = reLayout;
+var unread = 0;
 
 function getWebView()
 {
@@ -82,6 +83,19 @@ function setupRepaintWorkaround()
           workaround_div.style.display = 'none';
         }, 2000);
       }, 1000);
+    }
+    else if (typeof(e.data.unread) != "undefined")
+    {
+      var this_win = chrome.app.window.current();
+      if (e.data.unread > unread)
+      {
+        this_win.drawAttention();
+      }
+      else if (e.data.unread === 0)
+      {
+        this_win.clearAttention();
+      }
+      unread = e.data.unread;
     }
   });
 
