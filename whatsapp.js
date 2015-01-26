@@ -18,7 +18,7 @@ onload = function()
   window.addEventListener('message', onWebViewMessage);
 
   webview.addEventListener('permissionrequest', function(e) {
-    if (e.permission === 'media' || e.permission === 'geolocation') {
+    if (e.permission === 'media' || e.permission === 'geolocation' || e.permission === 'download') {
       e.request.allow();
     }
   });
