@@ -65,15 +65,10 @@ function handleLoadStart(e)
 
 function injectJS()
 {
-  var loader = new XMLHttpRequest();
-  loader.open('GET', 'injected.js');
-  loader.onload = function() {
-    var webview = getWebView();
-    webview.executeScript({ code: this.responseText }, function(res) {
-      webview.contentWindow.postMessage('setup', '*');
-    });
-  }
-  loader.send();
+  var webview = getWebView();
+  webview.executeScript({ file: "injected.js" }, function(res) {
+    webview.contentWindow.postMessage('setup', '*');
+  });
 }
 
 function onWebViewMessage(msg)
