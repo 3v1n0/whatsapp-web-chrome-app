@@ -94,6 +94,21 @@ function onWebViewMessage(msg)
     unread = data.unread;
     updateTitle();
   }
+  else if ('notification' in data)
+  {
+    var req = new XMLHttpRequest();
+    req.responseType = 'blob';
+    req.onload = function() {
+      var icon_uri = 'icon_128.png';
+      if (req.statusText === 'OK')
+        icon_uri = window.URL.createObjectURL(req.response);
+
+      var notify = {type: "basic", iconUrl: icon_uri, title: data.notification, message: data.options.body};
+      chrome.notifications.create(data.options.tag, notify, function() {});
+    };
+    req.open('GET', data.options.icon, true);
+    req.send();
+  }
 }
 
 function handleKeyDown(event)

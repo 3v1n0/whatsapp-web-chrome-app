@@ -22,6 +22,8 @@
     "audioCapture",
     "notifications",
     "videoCapture",
-    "webview"
+    "webview",
+    "*://*.whatsapp.com/*",
+    "*://whatsapp.com/*"
   ]
 }
