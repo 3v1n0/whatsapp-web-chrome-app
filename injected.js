@@ -6,10 +6,18 @@ var count_obser = null;
 var last_unread = 0;
 
 window.addEventListener('message', function(e) {
+  console.log(e);
   if (!appwindow)
   {
-    appwindow = e.source;
-    onLoaded();
+    if (e.data === 'setup')
+    {
+      appwindow = e.source;
+      onLoaded();
+    }
+  }
+  else if ('notification' in e.data)
+  {
+    appwindow.postMessage(e.data, '*');
   }
 });
 
@@ -45,8 +53,20 @@ function onLoaded()
   // It would be nicer to initialize this after initialization, but let's be safer
   count_obser = new MutationObserver(verify_unread);
   count_obser.observe(document, {subtree: true, attributes: true });
-
   verify_unread();
+
+  // Override default notifications, and use chrome desktop notifications instead
+  var script = document.createElement('script');
+  script.textContent = '(' + function() {
+    var stock_notification = window.Notification;
+    window.Notification = function(title, options) {
+      window.setTimeout(function() {console.log(not);}, 1000);
+      window.postMessage({'notification': title, 'options': options}, '*');
+    };
+    window.Notification.permission = stock_notification.permission;
+  } + ')();';
+  (document.head||document.documentElement).appendChild(script);
+  script.parentNode.removeChild(script);
 }
 
 function send_initialized()
