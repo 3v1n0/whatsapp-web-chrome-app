@@ -6,7 +6,6 @@ var count_obser = null;
 var last_unread = 0;
 
 window.addEventListener('message', function(e) {
-  console.log(e);
   if (!appwindow)
   {
     if (e.data === 'setup')
@@ -15,7 +14,7 @@ window.addEventListener('message', function(e) {
       onLoaded();
     }
   }
-  else if ('notification' in e.data)
+  else
   {
     appwindow.postMessage(e.data, '*');
   }
@@ -55,15 +54,10 @@ function onLoaded()
   count_obser.observe(document, {subtree: true, attributes: true });
   verify_unread();
 
-  // Override default notifications, and use chrome desktop notifications instead
+  // Override default focus action with proper chrome action
   var script = document.createElement('script');
   script.textContent = '(' + function() {
-    var stock_notification = window.Notification;
-    window.Notification = function(title, options) {
-      window.setTimeout(function() {console.log(not);}, 1000);
-      window.postMessage({'notification': title, 'options': options}, '*');
-    };
-    window.Notification.permission = stock_notification.permission;
+    window.focus = function() { window.postMessage('focus', '*'); }
   } + ')();';
   (document.head||document.documentElement).appendChild(script);
   script.parentNode.removeChild(script);
