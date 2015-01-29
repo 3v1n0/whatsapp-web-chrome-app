@@ -57,7 +57,12 @@ function onLoaded()
   // Override default focus action with proper chrome action
   var script = document.createElement('script');
   script.textContent = '(' + function() {
-    window.focus = function() { window.postMessage('focus', '*'); }
+    var default_window_focus = window.focus;
+    window.focus = function() {
+      if (default_window_focus)
+        default_window_focus();
+      window.postMessage('focus', '*');
+    }
   } + ')();';
   (document.head||document.documentElement).appendChild(script);
   script.parentNode.removeChild(script);
