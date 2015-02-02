@@ -102,7 +102,7 @@ function onWebViewMessage(msg)
 
 function handleKeyDown(event)
 {
-  if (event.ctrlKey)
+  if (event.ctrlKey && !event.altKey)
   {
     switch (event.keyCode)
     {
