@@ -16,6 +16,7 @@ onload = function()
 
   window.addEventListener('keydown', handleKeyDown);
   window.addEventListener('message', onWebViewMessage);
+  window.addEventListener('focus', function() { webview.focus(); });
 
   webview.addEventListener('permissionrequest', function(e) {
     if (e.permission === 'media' || e.permission === 'geolocation' || e.permission === 'download') {
